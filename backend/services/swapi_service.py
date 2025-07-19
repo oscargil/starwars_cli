@@ -1,6 +1,7 @@
 import httpx
 from typing import Optional, List, Dict, Any
 from backend.services.exceptions import SwapiError
+from async_lru import alru_cache
 
 SWAPI_BASE_URL = "https://swapi.dev/api"
 PAGE_SIZE = 10
@@ -10,8 +11,9 @@ class SwapiService:
     def __init__(self, client: httpx.AsyncClient):
         self.client = client
 
+    @alru_cache(maxsize=64)
     async def fetch_all(self, resource: str, search: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Fetch all results for a resource from SWAPI, optionally filtered by search."""
+        """Fetch all results for a resource from SWAPI, optionally filtered by search. Cached for performance."""
         all_results = []
         url = f"{SWAPI_BASE_URL}/{resource}/"
         params = {"search": search} if search else None
@@ -34,6 +36,10 @@ class SwapiService:
             except Exception as e:
                 raise SwapiError("Unexpected error while fetching data from SWAPI.") from e
         return all_results
+
+    def clear_cache(self):
+        """Clear the SWAPI fetch cache (for testing or admin use)."""
+        self.fetch_all.cache_clear()
 
     def sort_data(self, data: List[Dict[str, Any]], sort_by: Optional[str]) -> List[Dict[str, Any]]:
         """Sort data by the specified attribute if provided."""

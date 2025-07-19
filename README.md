@@ -54,7 +54,7 @@ docker-compose exec cli bash
 # Then run CLI commands as below
 ```
 
-### Run Locally (Recommended)
+### Run Locally
 ```bash
 cd cli
 pip install -r ../requirements.txt
@@ -101,4 +101,17 @@ starwars_app/
 curl "http://localhost:6969/people?page=1&search=skywalker&sort_by=name"
 curl "http://localhost:6969/planets?page=2&sort_by=diameter"
 ```
+
+---
+
+## Backend Performance: Caching
+
+To improve performance and reduce latency, the backend uses an in-memory cache for SWAPI responses. This means that repeated queries for the same resource and search term are served much faster, reducing the number of requests to SWAPI and improving user experience.
+
+- **How it works:**
+  - The cache is implemented using [`async_lru`](https://pypi.org/project/async-lru/).
+  - Up to 64 unique queries are cached in memory.
+  - The cache is automatically cleared when the server restarts, or can be cleared programmatically if needed.
+
+This approach provides a significant speed boost for repeated queries and helps avoid hitting SWAPI rate limits.
 
