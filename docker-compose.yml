@@ -1,13 +1,18 @@
-# docker-compose.yml
-
-version: '3.8'
-
 services:
   backend:
     build: .
     container_name: starwars_backend
     ports:
-      - "8000:8000"
+      - "6969:8000"
     volumes:
       - ./backend:/app/backend
-      
+      - ./cli:/app/cli
+
+  cli:
+    build: .
+    container_name: starwars_cli
+    entrypoint: ["tail", "-f", "/dev/null"]
+    depends_on:
+      - backend
+    volumes:
+      - ./cli:/app/cli
