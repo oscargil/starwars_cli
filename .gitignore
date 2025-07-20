@@ -83,3 +83,5 @@ ipython_config.py
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+backend/logs/starwars.log

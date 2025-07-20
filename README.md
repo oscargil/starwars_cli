@@ -102,7 +102,11 @@ python main.py list-people --search luke
 ---
 
 ## 3. Environment Variables
-- `API_BASE_URL` (default: `http://backend:8000` in Docker, or `http://localhost:8000` locally)
+
+- `API_BASE_URL`:
+  - In Docker (from another service/container): `http://backend:8000`
+  - On your local machine (with Docker Compose): `http://localhost:6969`
+  - On your local machine (running backend directly): `http://localhost:8000`
 
 ---
 
@@ -110,6 +114,7 @@ python main.py list-people --search luke
 ```
 starwars_app/
   backend/         # FastAPI backend
+    logs/          # Backend log files (not tracked by git)
   cli/             # Python CLI client (Typer)
   requirements.txt # Shared dependencies
   Dockerfile       # For backend & CLI
@@ -126,7 +131,7 @@ curl "http://localhost:6969/planets?page=2&sort_by=diameter"
 
 ---
 
-## Backend Performance: Caching
+## 6. Backend Performance: Caching
 
 To improve performance and reduce latency, the backend uses an in-memory cache for SWAPI responses. This means that repeated queries for the same resource and search term are served much faster, reducing the number of requests to SWAPI and improving user experience.
 
@@ -136,4 +141,24 @@ To improve performance and reduce latency, the backend uses an in-memory cache f
   - The cache is automatically cleared when the server restarts, or can be cleared programmatically if needed.
 
 This approach provides a significant speed boost for repeated queries and helps avoid hitting SWAPI rate limits.
+
+---
+
+## 7. Logging
+
+Backend activity, such as search and sort requests, is logged for monitoring and debugging purposes.
+
+- Logs are written to `backend/logs/starwars.log` (the directory is created automatically).
+- The log file is excluded from git, but the directory is included for convenience.
+- Logs are output both to the file and to the console.
+- In Docker, map the `backend/logs` directory to your host to persist and access logs outside the container.
+- Example log entry:
+  ```
+  2024-05-01 12:34:56,789 INFO Search/Sort request: resource=people, search=luke, sort_by=name, page=1
+  ```
+- To view logs locally, check `backend/logs/starwars.log`.
+- In Docker, use a mapped volume or run:
+  ```bash
+  docker-compose exec starwars_backend cat backend/logs/starwars.log
+  ```
 

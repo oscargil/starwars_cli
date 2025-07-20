@@ -5,6 +5,7 @@ import math
 from fastapi.responses import JSONResponse
 from backend.services.swapi_service import SwapiService
 from backend.services.exceptions import SwapiError
+from backend.services.logger import logger
 
 app = FastAPI(title="Star Wars API", description="An API to explore Star Wars characters and planets")
 
@@ -20,6 +21,7 @@ def read_root():
 async def get_resource(request: Request, page: int = 1, search: Optional[str] = None, sort_by: Optional[str] = None):
     """Proxy endpoint for people and planets with pagination, search, and sorting."""
     resource = "people" if "people" in request.url.path else "planets"
+    logger.info(f"Search/Sort request: resource={resource}, search={search}, sort_by={sort_by}, page={page}")
     all_data = await swapi_service.fetch_all(resource, search)
     all_data = swapi_service.sort_data(all_data, sort_by)
     base_url = f"/{resource}?search={search or ''}&sort_by={sort_by or ''}"
