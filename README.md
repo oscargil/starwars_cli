@@ -43,6 +43,28 @@ uvicorn backend.main:app --reload
 GET /people?page=1&search=luke&sort_by=name
 ```
 
+### Mock AI Insight Endpoint
+- `GET /simulate-ai-insight`
+
+Returns a fake “AI” description for a given person or planet name. Useful for demo or testing.
+
+#### Query Parameters
+- `type` (string, required): `person` or `planet`
+- `name` (string, required): Name of the person or planet
+
+**Example:**
+```
+curl "http://localhost:8000/simulate-ai-insight?type=person&name=Luke%20Skywalker"
+```
+Response:
+```
+{
+  "type": "person",
+  "name": "Luke Skywalker",
+  "ai_description": "This person named 'Luke Skywalker' is truly remarkable. According to our advanced AI, Luke Skywalker is destined to play a pivotal role in the galaxy!"
+}
+```
+
 ---
 
 ## 2. CLI Client
@@ -50,7 +72,7 @@ GET /people?page=1&search=luke&sort_by=name
 ### Run in Docker Compose
 You can exec into the CLI container:
 ```bash
-docker-compose exec cli bash
+docker-compose exec starwars_cli bash
 # Then run CLI commands as below
 ```
 

@@ -1,6 +1,6 @@
 import httpx
 from typing import Optional
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Query
 import math
 from fastapi.responses import JSONResponse
 from backend.services.swapi_service import SwapiService
@@ -24,6 +24,17 @@ async def get_resource(request: Request, page: int = 1, search: Optional[str] = 
     all_data = swapi_service.sort_data(all_data, sort_by)
     base_url = f"/{resource}?search={search or ''}&sort_by={sort_by or ''}"
     return swapi_service.paginate(all_data, page, base_url)
+
+@app.get("/simulate-ai-insight")
+async def simulate_ai_insight(
+    type: str = Query(..., regex="^(person|planet)$"), name: str = Query(...)):
+    """Mock AI endpoint that returns a fake AI description for a person or planet."""
+    if not type or not name:
+        raise HTTPException(status_code=400, detail="Both 'type' and 'name' query parameters are required.")
+    if type not in ("person", "planet"):
+        raise HTTPException(status_code=400, detail="'type' must be either 'person' or 'planet'.")
+    description = f"This {type} named '{name}' is truly remarkable. According to our advanced AI, {name} is destined to play a pivotal role in the galaxy!"
+    return {"type": type, "name": name, "ai_description": description}
 
 @app.exception_handler(SwapiError)
 async def swapi_error_handler(request: Request, exc: SwapiError):
