@@ -6,3 +6,4 @@ requests
 fastapi
 uvicorn
 async-lru
+python-dotenv

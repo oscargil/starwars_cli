@@ -17,3 +17,5 @@ services:
       - backend
     volumes:
       - ./cli:/app/cli
+    environment:
+      - API_BASE_URL=http://backend:8000

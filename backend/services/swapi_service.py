@@ -2,16 +2,18 @@ import httpx
 from typing import Optional, List, Dict, Any
 from backend.services.exceptions import SwapiError
 from async_lru import alru_cache
+import os
 
-SWAPI_BASE_URL = "https://swapi.dev/api"
-PAGE_SIZE = 10
+SWAPI_BASE_URL = os.getenv("SWAPI_BASE_URL", "https://swapi.dev/api")
+PAGE_SIZE = int(os.getenv("PAGE_SIZE", 10))
+CACHE_SIZE = int(os.getenv("CACHE_SIZE", 64))
 
 class SwapiService:
     """Service for fetching, sorting, and paginating Star Wars data from SWAPI."""
     def __init__(self, client: httpx.AsyncClient):
         self.client = client
 
-    @alru_cache(maxsize=64)
+    @alru_cache(maxsize=CACHE_SIZE)
     async def fetch_all(self, resource: str, search: Optional[str] = None) -> List[Dict[str, Any]]:
         """Fetch all results for a resource from SWAPI, optionally filtered by search. Cached for performance."""
         all_results = []

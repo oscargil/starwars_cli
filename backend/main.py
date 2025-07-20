@@ -6,6 +6,8 @@ from fastapi.responses import JSONResponse
 from backend.services.swapi_service import SwapiService
 from backend.services.exceptions import SwapiError
 from backend.services.logger import logger
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI(title="Star Wars API", description="An API to explore Star Wars characters and planets")
 

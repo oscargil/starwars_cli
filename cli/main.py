@@ -1,15 +1,23 @@
 from typing import List, Optional
 import typer
-from config import API_BASE_URL
+import os
+from dotenv import load_dotenv
 from services.api_client import ApiClient, ApiError
 from services.table_renderer import render_table
 from rich.console import Console
+
+# Load environment variables from .env if present
+load_dotenv()
+
+API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:6969")
+
+print(f"API_BASE_URL: {API_BASE_URL}")
 
 app = typer.Typer()
 
 api_client = ApiClient(API_BASE_URL)
 
-PAGE_SIZE = 10
+PAGE_SIZE = int(os.environ.get("PAGE_SIZE", 10))
 console = Console()
 
 def print_pagination_info(page: int, total_count: int):

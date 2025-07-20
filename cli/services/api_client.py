@@ -1,5 +1,8 @@
 import requests
 from typing import Optional, Dict, Any
+import os
+
+REQUEST_TIMEOUT = float(os.environ.get("REQUEST_TIMEOUT", 10))
 
 class ApiError(Exception):
     """Exception for API errors."""
@@ -19,7 +22,7 @@ class ApiClient:
             params["search"] = search
         url = f"{self.base_url}/{resource}"
         try:
-            response = requests.get(url, params=params)
+            response = requests.get(url, params=params, timeout=REQUEST_TIMEOUT)
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
             raise ApiError(f"HTTP error: {e.response.status_code} {e.response.reason}") from e

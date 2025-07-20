@@ -69,6 +69,10 @@ Response:
 
 ## 2. CLI Client
 
+> **Note:**  
+> By default, the CLI will connect to `http://localhost:6969` if run outside Docker, and to `http://backend:8000` if run inside Docker Compose (as set in `docker-compose.yml`).  
+> You can override this by setting the `API_BASE_URL` environment variable in your environment or `.env` file.
+
 ### Run in Docker Compose
 You can exec into the CLI container:
 ```bash
@@ -103,10 +107,46 @@ python main.py list-people --search luke
 
 ## 3. Environment Variables
 
-- `API_BASE_URL`:
-  - In Docker (from another service/container): `http://backend:8000`
-  - On your local machine (with Docker Compose): `http://localhost:6969`
-  - On your local machine (running backend directly): `http://localhost:8000`
+The backend and CLI can be configured via environment variables for flexible deployment (local, Docker, or cloud providers like Azure/AWS/GCP):
+
+- `API_BASE_URL`:  
+  - Default for CLI in Docker Compose: `http://backend:8000` (set in `docker-compose.yml`)
+  - Default for CLI outside Docker: `http://localhost:6969`
+  - You can override this in your environment or `.env` file.
+- `SWAPI_BASE_URL`: Base URL for the Star Wars API proxy (default: `https://swapi.dev/api`).
+- `PAGE_SIZE`: Number of items per page for pagination (default: `10`). Applies to both backend and CLI.
+- `CACHE_SIZE`: Number of unique SWAPI queries to cache in memory (default: `64`).
+- `LOG_LEVEL`: Logging level for backend logs (default: `INFO`).
+- `PORT`: Port for the FastAPI backend (default: `8000`). Set this when running uvicorn, e.g. `uvicorn backend.main:app --port $PORT`.
+- `REQUEST_TIMEOUT`: Timeout (in seconds) for CLI HTTP requests (default: `10`).
+
+You can set these variables in your deployment environment, Docker Compose, or cloud provider configuration.
+
+Example `.env` template:
+```env
+# API base URL for CLI
+API_BASE_URL=http://localhost:6969
+
+# SWAPI proxy base URL
+SWAPI_BASE_URL=https://swapi.dev/api
+
+# Items per page
+PAGE_SIZE=10
+
+# Cache size for SWAPI queries
+CACHE_SIZE=64
+
+# Logging level (DEBUG, INFO, WARNING, ERROR)
+LOG_LEVEL=INFO
+
+# Backend port (used when running uvicorn)
+PORT=8000
+
+# CLI request timeout (seconds)
+REQUEST_TIMEOUT=10
+```
+
+**Note:** All environment variables have sensible defaults. The application will work even if no `.env` file is present.
 
 ---
 
