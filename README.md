@@ -249,7 +249,7 @@ starwars_app/
 
 ---
 
-## 5. Running Tests (Docker Compose)
+## 5. Running Tests
 
 **Purpose:**  
 Run all unit tests for the backend and CLI in an isolated environment.
@@ -260,7 +260,24 @@ Before running the tests, make sure the images are built:
 docker compose build
 ```
 
-### Run Tests
+### Run Tests with Docker Compose
 To execute all unit tests (without starting backend or CLI services):
+```bash
+docker compose run --rm test
 ```
+- This will run all tests in the `tests/` directory using the appropriate environment.
+
+### Run Tests Locally (without Docker)
+You can also run tests directly on your machine:
+```bash
+# From the project root
+pytest tests/
 ```
+- Make sure you have installed the dependencies:
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+### Notes
+- Test results will be shown in the console.
+- The backend and CLI have separate test modules under `tests/backend/` and `tests/cli/`.
