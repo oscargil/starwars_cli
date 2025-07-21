@@ -141,7 +141,7 @@ To use the CLI inside Docker Compose, first make sure the backend service is run
 
 ```bash
 docker compose up backend cli  # (if not already running)
-docker compose exec starwars_cli bash
+docker compose exec cli bash
 # Now you can run CLI commands as shown below
 ```
 
