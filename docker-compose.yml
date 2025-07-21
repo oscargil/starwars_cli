@@ -19,3 +19,10 @@ services:
       - ./cli:/app/cli
     environment:
       - API_BASE_URL=http://backend:8000
+  
+  test:
+    build: .
+    container_name: starwars_test
+    command: pytest tests/
+    environment:
+      - PYTHONPATH=/app:/app/cli

@@ -44,9 +44,9 @@ class SwapiService:
         self.fetch_all.cache_clear()
 
     def sort_data(self, data: List[Dict[str, Any]], sort_by: Optional[str]) -> List[Dict[str, Any]]:
-        """Sort data by the specified attribute if provided."""
+        """Sort data by the specified attribute if provided. Items missing the key are placed at the end."""
         if sort_by:
-            data.sort(key=lambda item: str(item.get(sort_by, "")))
+            data.sort(key=lambda item: (sort_by not in item, str(item.get(sort_by, ""))))
         return data
 
     def paginate(self, data: List[Dict[str, Any]], page: int, base_url: str) -> Dict[str, Any]:
