@@ -125,6 +125,17 @@ curl "http://localhost:6969/planets?page=2&sort_by=diameter"
 
 ---
 
+## Interactive API Documentation (FastAPI)
+
+The API provides interactive, auto-generated documentation via FastAPI:
+
+- **Swagger UI:** [http://localhost:6969/docs](http://localhost:6969/docs)
+- **ReDoc:** [http://localhost:6969/redoc](http://localhost:6969/redoc)
+
+These interfaces let you visually explore and test all API endpoints directly from your browser.
+
+---
+
 ## 2. CLI Client
 
 **Purpose:**  
@@ -251,14 +262,5 @@ docker compose build
 
 ### Run Tests
 To execute all unit tests (without starting backend or CLI services):
-```bash
-docker compose run --rm test
 ```
-
-### Notes
-- If you run `docker compose up` without specifying services, all services will start, including the `test` service (which will run the tests and then exit).
-- The `test` service is intended to be run on demand only.
-- To avoid running tests when starting the app, always specify the services you want to run (e.g., `docker compose up backend cli`).
-
----
-
+```
