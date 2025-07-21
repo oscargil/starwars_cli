@@ -2,6 +2,8 @@
 
 Explore Star Wars People and Planets from the command line and via a REST API, powered by FastAPI and SWAPI.
 
+---
+
 ## Features
 - FastAPI backend with `/people` and `/planets` endpoints
 - Query params: `page`, `search`, `sort_by`
@@ -13,10 +15,23 @@ Explore Star Wars People and Planets from the command line and via a REST API, p
 
 ## 1. FastAPI Service
 
-### Run with Docker Compose
+**Purpose:**  
+Provides a REST API to explore Star Wars people and planets, with pagination, search, and sorting.
+
+### Build Docker Images
+Before running any services with Docker Compose, you must build the images:
 ```bash
-docker-compose up --build
+docker compose build
 ```
+
+### Run with Docker Compose
+**Important:**
+If you run `docker compose up` (or `docker-compose up`) without specifying services, **all defined services will start, including the `test` service** (which will run the tests and then exit). To start only the application (backend and cli), run:
+
+```bash
+docker compose up backend cli
+```
+
 - The API will be available at: [http://localhost:6969](http://localhost:6969)
 
 ### Run Locally (without Docker)
@@ -38,7 +53,7 @@ uvicorn backend.main:app --reload
 - `search` (string) – Case-insensitive partial match on the name field
 - `sort_by` (string) – Sort by any attribute (e.g., name, created)
 
-**Example:**
+#### Example Usage
 ```
 GET /people?page=1&search=luke&sort_by=name
 ```
@@ -52,7 +67,7 @@ Returns a fake “AI” description for a given person or planet name. Useful fo
 - `type` (string, required): `person` or `planet`
 - `name` (string, required): Name of the person or planet
 
-**Example:**
+#### Example
 ```
 curl "http://localhost:8000/simulate-ai-insight?type=person&name=Luke%20Skywalker"
 ```
@@ -65,19 +80,69 @@ Response:
 }
 ```
 
+### Backend Performance: Caching
+
+**Purpose:**  
+Improve performance and reduce latency by caching SWAPI responses.
+
+#### How it Works
+- The cache is implemented using [`async_lru`](https://pypi.org/project/async-lru/).
+- Up to 64 unique queries are cached in memory.
+- The cache is automatically cleared when the server restarts, or can be cleared programmatically if needed.
+
+#### Notes
+- This approach provides a significant speed boost for repeated queries and helps avoid hitting SWAPI rate limits.
+
+### Logging
+
+**Purpose:**  
+Track and monitor backend activity for debugging and auditing.
+
+#### Log Locations
+- Logs are written to `backend/logs/starwars.log` (the directory is created automatically).
+- The log file is excluded from git, but the directory is included for convenience.
+- Logs are output both to the file and to the console.
+
+#### Example Log Entry
+```
+2024-05-01 12:34:56,789 INFO Search/Sort request: resource=people, search=luke, sort_by=name, page=1
+```
+
+### Example API Usage
+
+**Purpose:**  
+Demonstrate how to interact with the API using curl.
+
+#### Example curl Commands
+```bash
+curl "http://localhost:6969/people?page=1&search=skywalker&sort_by=name"
+curl "http://localhost:6969/planets?page=2&sort_by=diameter"
+```
+
+### Notes
+- The backend service is exposed on port 8000 inside Docker, mapped to 6969 on your host.
+- All endpoints support pagination, search, and sorting as described above.
+
 ---
 
 ## 2. CLI Client
 
-> **Note:**  
-> By default, the CLI will connect to `http://localhost:6969` if run outside Docker, and to `http://backend:8000` if run inside Docker Compose (as set in `docker-compose.yml`).  
-> You can override this by setting the `API_BASE_URL` environment variable in your environment or `.env` file.
+**Purpose:**  
+A command-line interface to interact with the Star Wars API, allowing you to list, search, and sort people and planets.
+
+### Build Docker Images
+Before running the CLI in Docker Compose, make sure the images are built:
+```bash
+docker compose build
+```
 
 ### Run in Docker Compose
-You can exec into the CLI container:
+To use the CLI inside Docker Compose, first make sure the backend service is running (see section 1). Then, you can open a terminal inside the CLI container:
+
 ```bash
-docker-compose exec starwars_cli bash
-# Then run CLI commands as below
+docker compose up backend cli  # (if not already running)
+docker compose exec starwars_cli bash
+# Now you can run CLI commands as shown below
 ```
 
 ### Run Locally
@@ -103,12 +168,18 @@ Search people by name:
 python main.py list-people --search luke
 ```
 
+### Notes
+- By default, the CLI will connect to `http://localhost:6969` if run outside Docker, and to `http://backend:8000` if run inside Docker Compose (as set in `docker-compose.yml`).
+- You can override this by setting the `API_BASE_URL` environment variable in your environment or `.env` file.
+
 ---
 
 ## 3. Environment Variables
 
-The backend and CLI can be configured via environment variables for flexible deployment (local, Docker, or cloud providers like Azure/AWS/GCP):
+**Purpose:**  
+Configure the backend and CLI for flexible deployment (local, Docker, or cloud providers).
 
+### List of Variables
 - `API_BASE_URL`:  
   - Default for CLI in Docker Compose: `http://backend:8000` (set in `docker-compose.yml`)
   - Default for CLI outside Docker: `http://localhost:6969`
@@ -120,9 +191,7 @@ The backend and CLI can be configured via environment variables for flexible dep
 - `PORT`: Port for the FastAPI backend (default: `8000`). Set this when running uvicorn, e.g. `uvicorn backend.main:app --port $PORT`.
 - `REQUEST_TIMEOUT`: Timeout (in seconds) for CLI HTTP requests (default: `10`).
 
-You can set these variables in your deployment environment, Docker Compose, or cloud provider configuration.
-
-Example `.env` template:
+### Example .env File
 ```env
 # API base URL for CLI
 API_BASE_URL=http://localhost:6969
@@ -146,11 +215,17 @@ PORT=8000
 REQUEST_TIMEOUT=10
 ```
 
-**Note:** All environment variables have sensible defaults. The application will work even if no `.env` file is present.
+### Notes
+- All environment variables have sensible defaults. The application will work even if no `.env` file is present.
 
 ---
 
 ## 4. Project Structure
+
+**Purpose:**  
+Overview of the main directories and files in the project.
+
+### Directory Tree
 ```
 starwars_app/
   backend/         # FastAPI backend
@@ -163,42 +238,27 @@ starwars_app/
 
 ---
 
-## 5. Example API Usage
+## 5. Running Tests (Docker Compose)
+
+**Purpose:**  
+Run all unit tests for the backend and CLI in an isolated environment.
+
+### Build Docker Images
+Before running the tests, make sure the images are built:
 ```bash
-curl "http://localhost:6969/people?page=1&search=skywalker&sort_by=name"
-curl "http://localhost:6969/planets?page=2&sort_by=diameter"
+docker compose build
 ```
 
----
+### Run Tests
+To execute all unit tests (without starting backend or CLI services):
+```bash
+docker compose run --rm test
+```
 
-## 6. Backend Performance: Caching
-
-To improve performance and reduce latency, the backend uses an in-memory cache for SWAPI responses. This means that repeated queries for the same resource and search term are served much faster, reducing the number of requests to SWAPI and improving user experience.
-
-- **How it works:**
-  - The cache is implemented using [`async_lru`](https://pypi.org/project/async-lru/).
-  - Up to 64 unique queries are cached in memory.
-  - The cache is automatically cleared when the server restarts, or can be cleared programmatically if needed.
-
-This approach provides a significant speed boost for repeated queries and helps avoid hitting SWAPI rate limits.
+### Notes
+- If you run `docker compose up` without specifying services, all services will start, including the `test` service (which will run the tests and then exit).
+- The `test` service is intended to be run on demand only.
+- To avoid running tests when starting the app, always specify the services you want to run (e.g., `docker compose up backend cli`).
 
 ---
-
-## 7. Logging
-
-Backend activity, such as search and sort requests, is logged for monitoring and debugging purposes.
-
-- Logs are written to `backend/logs/starwars.log` (the directory is created automatically).
-- The log file is excluded from git, but the directory is included for convenience.
-- Logs are output both to the file and to the console.
-- In Docker, map the `backend/logs` directory to your host to persist and access logs outside the container.
-- Example log entry:
-  ```
-  2024-05-01 12:34:56,789 INFO Search/Sort request: resource=people, search=luke, sort_by=name, page=1
-  ```
-- To view logs locally, check `backend/logs/starwars.log`.
-- In Docker, use a mapped volume or run:
-  ```bash
-  docker-compose exec starwars_backend cat backend/logs/starwars.log
-  ```
 
